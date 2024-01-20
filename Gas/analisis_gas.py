@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 # Carga los datos desde el archivo CSV
-df = pd.read_csv('facturasluz.csv', parse_dates=['Fecha'])
+df = pd.read_csv('facturasgas.csv', parse_dates=['Fecha'])
 df.set_index('Fecha', inplace=True)
 
 # Calcula el consumo total mensual y el precio pagado cada mes
@@ -14,13 +14,13 @@ media_consumo = df['Consumo'].mean().round(2)
 media_precio = df['Precio'].mean().round(2)
 
 
-# Calcula los totales por año
+# Calcula los totales por año y media anual
 totales_por_anio = df.resample('Y').agg({'Consumo': 'sum', 'Precio': 'sum'})
 media_consumo_por_anio = df.groupby(df.index.year)['Consumo'].mean().round(2)
 media_precio_por_anio = df.groupby(df.index.year)['Precio'].mean().round(2)
 
 # Visualiza el consumo mensual y el precio pagado cada mes
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(15, 8.1))
 
 # Calcula una previsión utilizando Holt-Winters Exponential Smoothing
 modelo_consumo = ExponentialSmoothing(consumo_mensual['Consumo'], seasonal='add', seasonal_periods=12)
@@ -45,12 +45,12 @@ ax.plot(pronostico_precio , label='Previsión Pagos', linestyle='-.')
 # Añade totales por año como texto fuera de la gráfica
 etiqueta_cuadro_leyenda_consumo = ''
 for anio, total in totales_por_anio.iterrows():
-    etiqueta_cuadro_leyenda_consumo += f'Total {anio.year}: {total["Consumo"]} Kwh\n'
+    etiqueta_cuadro_leyenda_consumo += f'Total {anio.year}: {total["Consumo"]} m³\n'
     etiqueta_cuadro_leyenda_consumo += f'Total {anio.year}: {total["Precio"]} €\n'
-    etiqueta_cuadro_leyenda_consumo += f'Media Consumo {anio.year}: {media_consumo_por_anio[anio.year]} Kwh\n'
+    etiqueta_cuadro_leyenda_consumo += f'Media Consumo {anio.year}: {media_consumo_por_anio[anio.year]} m³\n'
     etiqueta_cuadro_leyenda_consumo += f'Media Pagado {anio.year}: {media_precio_por_anio[anio.year]} €\n'
     
-etiqueta_cuadro_leyenda_media =f'Media Consumo Periodo Mostrado: {media_consumo} Kwh\n'
+etiqueta_cuadro_leyenda_media =f'Media Consumo Periodo Mostrado: {media_consumo} m³\n'
 etiqueta_cuadro_leyenda_media +=f'Media Precio Pagado Periodo Mostrado: {media_precio} €\n'
 
 
@@ -58,11 +58,12 @@ etiqueta_cuadro_leyenda_media +=f'Media Precio Pagado Periodo Mostrado: {media_p
 plt.text(1.05, 0.7, etiqueta_cuadro_leyenda_consumo, transform=ax.transAxes, fontsize=10, verticalalignment='center', bbox=dict(boxstyle="round", alpha=0.1))
 plt.text(1.05, 0.3, etiqueta_cuadro_leyenda_media, transform=ax.transAxes, fontsize=10, verticalalignment='center', bbox=dict(boxstyle="round", alpha=0.1))
 
+
 # Muestra la leyenda
 ax.legend()
 
 #etiqueta eje y
-ax.set_ylabel('Kwh/€', fontsize=12, labelpad=10)
+ax.set_ylabel('m³/€', fontsize=12, labelpad=10)
 
 # Agrega un título a la ventana de la gráfica
 plt.suptitle('Análisis de Consumo de Energía Eléctrica y Precio mensual', fontsize=16)
